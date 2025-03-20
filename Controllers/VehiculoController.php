@@ -50,7 +50,6 @@ class VehiculoController {
         }
     }
 
-    // Método específico para buscar por tipo
     public function getByTipo($id_tipo) {
         $data = $this->model->getByTipo($id_tipo);
         if ($data) {
@@ -61,18 +60,22 @@ class VehiculoController {
     }
     
     private function post() {
+        header('Content-Type: application/json; charset=utf-8');
+    
         $data = json_decode(file_get_contents('php://input'), true);
-
+    
         if (!isset($data['modelo_vehiculo'], $data['id_tipo'])) {
             sendError(400, 'Faltan datos obligatorios (modelo_vehiculo, id_tipo)');
             return;
         }
-
+    
         $result = $this->model->create($data);
-        if ($result) {
-            sendResponse(201, ['message' => 'Vehículo creado correctamente']);
+    
+        if (isset($result['error'])) {
+            sendError(500, $result['error']);
         } else {
-            sendError(500, 'Error al crear el vehículo');
+           
+            sendResponse(201, ['message' => 'Vehículo creado correctamente']);
         }
     }
 

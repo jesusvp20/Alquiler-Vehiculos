@@ -8,16 +8,14 @@ class Conexion {
     private $db = "Alquiler-Vehiculos";
     private $connection;
 
-    // Constructor de la clase
     public function __construct() {
-        // Establecer la conexión
+
         $this->connection = pg_connect("host=$this->host dbname=$this->db user=$this->username password=$this->password");
 
-        // Verificar si la conexión fue exitosa
         if (!$this->connection) {
             die("Error en la conexión con la base de datos");
         } else {
-            echo "Conexión exitosa";
+         json_encode ("Conexión exitosa");
         }
     }
 

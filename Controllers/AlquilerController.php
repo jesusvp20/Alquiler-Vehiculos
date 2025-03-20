@@ -49,27 +49,32 @@ class AlquilerController{
     private function post() {
         $data = json_decode(file_get_contents('php://input'), true);
     
-        if (!isset($data['detalles_alquiler'], $data['precio_alquiler'], $data['fecha_alquiler'], $data['fecha_devolucion'], $data['id_cliente'], $data['placa_vehiculo'])) {
-            header("HTTP/1.1 400 Bad Request");
-            echo json_encode(["error" => "Faltan datos obligatorios para registrar el alquiler"]);
+        if (!isset(
+            $data['detalles_alquiler'], 
+            $data['precio_alquiler'], 
+            $data['fecha_alquiler'], 
+            $data['fecha_devolucion'], 
+            $data['id_cliente'], 
+            $data['placa_vehiculo']
+        )) {
+            sendError(400, "Faltan datos obligatorios para registrar el alquiler");
             exit();
         }
     
         if (strtotime($data['fecha_devolucion']) < strtotime($data['fecha_alquiler'])) {
-            header("HTTP/1.1 400 Bad Request");
-            echo json_encode(["error" => "La fecha de devolución no puede ser anterior a la fecha de alquiler"]);
+            sendError(400, "La fecha de devolución no puede ser anterior a la fecha de alquiler");
             exit();
         }
     
         $result = $this->model->create($data);
     
-
-if ($result === true) {  // Asegura que solo entra si la operación fue exitosa
-    sendResponse(201, ['message' => 'Alquiler creado correctamente']);
-} else {
-    sendError(500, 'Error al crear el alquiler');
-}
+        if ($result === true) { 
+            sendResponse(201, ['message' => 'Alquiler creado correctamente']);
+        } else {
+            sendError(500, 'Error al crear el alquiler');
+        }
     }
+    
 
     private function put($id) {
         if (empty($id)) {
@@ -93,19 +98,25 @@ if ($result === true) {  // Asegura que solo entra si la operación fue exitosa
     }
 
     private function delete($id) {
-        
         if (empty($id)) {
             sendError(400, 'El ID del alquiler es obligatorio');
         }
-
-        // Eliminar el cliente
+    
         $result = $this->model->delete($id);
+        
+       
         if ($result) {
-            sendResponse(200, ['message' => 'Vehículo actualizado correctamente']);
+
+            if ($result > 0) {
+                sendResponse(200, ['message' => 'Alquiler eliminado correctamente']);
+            } else {
+                sendError(404, 'No se encontró alquiler con ese ID');
+            }
         } else {
-            sendError(500, 'Error al actualizar vehículo');
+            sendError(500, 'Error al eliminar el alquiler');
         }
-    } 
+    }
+    
 }
 
 ?>

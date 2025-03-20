@@ -8,9 +8,6 @@ class VehiculoModel {
         $this->conn = (new Conexion())->getConnection();
     }
 
-    /**
-     * Obtener todos los vehículos
-     */
     public function getAll() {
         $query = "SELECT * FROM vehiculos";
         $result = pg_query($this->conn, $query);
@@ -22,16 +19,12 @@ class VehiculoModel {
                   JOIN tipovehiculo t ON v.id_tipo = t.id_tipo 
                   WHERE v.placa = $1";
     
-        // Ejecutar la consulta con el parámetro
+      
         $result = pg_query_params($this->conn, $query, [$placa]);
     
-        // Retornar el resultado en forma de array asociativo
         return pg_fetch_assoc($result);
     }
     
-    /**
-     * Obtener un vehículo por su placa
-     */
     public function getByTipo($id_tipo) {
         $query = "SELECT * FROM vehiculos WHERE id_tipo = $1";
     
@@ -40,33 +33,40 @@ class VehiculoModel {
         return pg_fetch_all($result);
     }
 
-    /**
-     * Crear un nuevo vehículo
-     */
     public function create($data) {
-        $query = "INSERT INTO vehiculos (placa, numero_vehiculo, modelo_vehiculo, id_tipo, precio_alquiler, estado, imagen_vehiculo) 
-                  VALUES ($1, $2, $3, $4, $5, $6, $7)";
+        $query = "INSERT INTO vehiculos (
+            placa,
+            numero_vehiculo,
+            modelo_vehiculo,
+            id_tipo,
+            precio_alquiler,
+            estado,
+            imagen_vehiculo
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7)";
 
-        $result = pg_query_params($this->conn, $query, [
-            $data['placa'],
-            $data['numero_vehiculo'],
-            $data['modelo_vehiculo'],
-            $data['id_tipo'],
-            $data['precio_alquiler'],
-            $data['estado'],
-            $data['imagen_vehiculo'] ?? null
-        ]);
+        $params = [
+            $data['placa']            ?? null,
+            $data['numero_vehiculo']  ?? null,
+            $data['modelo_vehiculo']  ?? null,
+            $data['id_tipo']          ?? null,
+            $data['precio_alquiler']  ?? null,
+            $data['estado']           ?? null,
+            $data['imagen_vehiculo']  ?? null
+        ];
 
-        if ($result) {
-            return ["success" => "Vehículo registrado correctamente"];
-        } else {
-            return ["error" => "Error al registrar vehículo: " . pg_last_error($this->conn)];
+        $result = pg_query_params($this->conn, $query, $params);
+    
+        if ($result === false) {
+            return [
+                "error" => "Error al registrar vehículo: " . pg_last_error($this->conn)
+            ];
         }
+    
+        return [
+            "success" => "Vehículo registrado correctamente"
+        ];
     }
-
-    /**
-     * Actualizar los datos de un vehículo por su placa
-     */
+    
     public function update($placa, $data) {
         if (empty($placa)) {
             return ["error" => "La placa es obligatoria para actualizar el vehículo."];
@@ -87,7 +87,7 @@ class VehiculoModel {
             $data['id_tipo'],
             $data['precio_alquiler'],
             $data['estado'],
-            $data['imagen_vehiculo'] ?? null,
+            $data['imagen_vehiculo'],
             $placa
         ]);
 
@@ -98,11 +98,8 @@ class VehiculoModel {
         }
     }
 
-    /**
-     * Eliminar un vehículo por su placa (y sus alquileres asociados)
-     */
+
     public function delete($placa) {
-        // Eliminar alquileres asociados
         $query_alquiler = "DELETE FROM alquiler WHERE placa_vehiculo = $1";
         $result_alquiler = pg_query_params($this->conn, $query_alquiler, [$placa]);
 
@@ -110,7 +107,6 @@ class VehiculoModel {
             return ["error" => "Error al eliminar alquileres: " . pg_last_error($this->conn)];
         }
 
-        // Eliminar el vehículo
         $query_vehiculo = "DELETE FROM vehiculos WHERE placa = $1";
         $result_vehiculo = pg_query_params($this->conn, $query_vehiculo, [$placa]);
 

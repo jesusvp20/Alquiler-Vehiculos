@@ -55,7 +55,7 @@ class TipoModelo {
     }
 
     public function delete($id_tipo) {
-        // Verificar si hay vehículos asociados al tipo
+
         $query_check = "SELECT COUNT(*) FROM vehiculos WHERE id_tipo = $1";
         $result_check = pg_query_params($this->conn, $query_check, [$id_tipo]);
         $count = pg_fetch_result($result_check, 0, 0);
@@ -66,7 +66,6 @@ class TipoModelo {
             exit();
         }
 
-        // Eliminar el tipo si no hay dependencias
         $query_delete = "DELETE FROM tipovehiculo WHERE id_tipo = $1";
         $result = pg_query_params($this->conn, $query_delete, [$id_tipo]);
 

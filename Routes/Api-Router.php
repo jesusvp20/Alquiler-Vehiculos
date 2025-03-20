@@ -4,7 +4,6 @@ class ApiRouter {
         $segments = explode('/', trim($url, '/'));
         $resource = $segments[0] ?? '';
 
-        // Manejar la ruta para buscar vehículos por tipo
         if ($resource === 'vehiculos' && isset($segments[1]) && $segments[1] === 'tipo') {
             require_once __DIR__ . '/../controllers/VehiculoController.php';
             $controller = new VehiculoController();
@@ -17,7 +16,6 @@ class ApiRouter {
             return;
         }
 
-        // Rutas estándar
         switch ($resource) {
             case 'vehiculos':
                 require_once __DIR__ . '/../controllers/VehiculoController.php';
